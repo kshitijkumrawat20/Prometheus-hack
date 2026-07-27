@@ -2,66 +2,76 @@ import json
 import logging
 import os
 import base64
+import urllib.request
+import urllib.parse
 from google import genai
-from google.genai import types
 
 logger = logging.getLogger(__name__)
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-def generate_slide_image(slide_title: str, bullets: list, key_info: str) -> str | None:
-    """Generates an educational presentation slide graphic image using Gemini 3.1 Flash Lite Image model or Imagen fallback."""
-    generation_config = {
-        'temperature': 1,
-        'max_output_tokens': 65536,
-        'top_p': 0.95,
-        'thinking_level': 'low',
-        'image_config': {
-            'image_size': '1K',
+def _call_interactions_rest_api(model_name: str, prompt: str, thinking_level: str = "minimal") -> str | None:
+    """Calls Google GenerativeLanguage v1beta interactions API directly using exact REST payload."""
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/interactions?key={api_key}"
+    payload = {
+        "model": model_name,
+        "input": prompt,
+        "generation_config": {
+            "temperature": 1,
+            "max_output_tokens": 65536,
+            "top_p": 0.95,
+            "thinking_level": thinking_level
         },
+        "response_modalities": ["image", "text"]
     }
 
+    try:
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            if resp.status == 200:
+                res_body = json.loads(resp.read().decode('utf-8'))
+                # Parse steps for image output
+                for step in res_body.get("steps", []):
+                    content = step.get("content", [])
+                    for part in content:
+                        if part.get("type") == "image":
+                            # Base64 image data
+                            img_data = part.get("data") or part.get("inlineData", {}).get("data")
+                            if img_data:
+                                return f"data:image/jpeg;base64,{img_data}"
+    except Exception as e:
+        logger.warning(f"REST API call to {model_name} (thinking_level={thinking_level}) failed: {e}")
+    return None
+
+def generate_slide_image(slide_title: str, bullets: list, key_info: str) -> str | None:
+    """Generates educational presentation slide graphic image using gemini-3.1-flash-lite-image or gemini-3.1-flash-image."""
     bullets_text = " • ".join(bullets[:3]) if bullets else ""
     prompt = f"Educational 16:9 presentation slide card graphic. Dark background style. Title: '{slide_title}'. Notes: {bullets_text}. Details: {key_info}. High resolution infographic vector style."
 
-    # Primary: client.interactions API with gemini-3.1-flash-lite-image
-    try:
-        if hasattr(client, 'interactions'):
-            interaction = client.interactions.create(
-                model='models/gemini-3.1-flash-lite-image',
-                input=prompt,
-                generation_config=generation_config,
-                response_modalities=['image', 'text'],
-            )
-            for step in getattr(interaction, 'steps', []):
-                if getattr(step, 'type', None) == 'model_output' and getattr(step, 'content', None):
-                    for part in step.content:
-                        if getattr(part, 'type', None) == 'image' and hasattr(part, 'data'):
-                            b64_data = part.data
-                            if isinstance(b64_data, bytes):
-                                b64_str = base64.b64encode(b64_data).decode('utf-8')
-                            else:
-                                b64_str = str(b64_data)
-                            return f"data:image/jpeg;base64,{b64_str}"
-    except Exception as e:
-        logger.warning(f"Interactions API gemini-3.1-flash-lite-image fallback attempt: {e}")
+    # 1. Try gemini-3.1-flash-lite-image with minimal thinking_level
+    img = _call_interactions_rest_api("models/gemini-3.1-flash-lite-image", prompt, thinking_level="minimal")
+    if img:
+        return img
 
-    # Fallback 1: client.models.generate_images with imagen-3.0-generate-001
-    try:
-        response = client.models.generate_images(
-            model='imagen-3.0-generate-001',
-            prompt=prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-                output_mime_type='image/jpeg'
-            )
-        )
-        if response.generated_images:
-            img_bytes = response.generated_images[0].image.image_bytes
-            b64_str = base64.b64encode(img_bytes).decode('utf-8')
-            return f"data:image/jpeg;base64,{b64_str}"
-    except Exception as e:
-        logger.warning(f"Imagen image generation fallback unavailable: {e}")
+    # 2. Try gemini-3.1-flash-lite-image with low thinking_level
+    img = _call_interactions_rest_api("models/gemini-3.1-flash-lite-image", prompt, thinking_level="low")
+    if img:
+        return img
+
+    # 3. Try gemini-3.1-flash-image fallback model
+    img = _call_interactions_rest_api("models/gemini-3.1-flash-image", prompt, thinking_level="minimal")
+    if img:
+        return img
+
+    # 4. Try gemini-3.1-flash-image with low thinking_level
+    img = _call_interactions_rest_api("models/gemini-3.1-flash-image", prompt, thinking_level="low")
+    if img:
+        return img
 
     return None
 
