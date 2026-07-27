@@ -5,6 +5,7 @@ import RoadmapPage from './pages/RoadmapPage';
 import TutorPage from './pages/TutorPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import AuthModal from './components/AuthModal';
+import StreakHeaderBadge from './components/StreakHeaderBadge';
 import { uploadSyllabus, getGraph, getNextAction, getMe, logoutUser } from './api';
 
 function transformGraphData(apiData) {
@@ -264,8 +265,10 @@ function App() {
           </button>
         </nav>
 
-        {/* User Profile Button */}
+        {/* Gamified Study Streak Header & User Profile Button */}
         <div className="flex items-center gap-3 shrink-0">
+          {user && <StreakHeaderBadge studentId={studentId} graphData={graphData} />}
+
           {user ? (
             <div className="glass-panel px-3 py-1.5 rounded-xl border border-zinc-800 flex items-center gap-2 shadow-sm">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>

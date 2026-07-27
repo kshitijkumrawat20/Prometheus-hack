@@ -497,17 +497,38 @@ async def submit_answer(req: AnswerReq, db: AsyncSession = Depends(get_db)):
 
 @app.get("/api/student/{student_id}/summary")
 async def student_summary(student_id: str, db: AsyncSession = Depends(get_db)):
-    """Provide summary of student's mastery and learning stages."""
+    """Provide summary of student's mastery, study streak, and learning metrics."""
     mastery_result = await db.execute(select(MasteryState).where(MasteryState.student_id == student_id))
     mastery_states = mastery_result.scalars().all()
     
+    attempts_result = await db.execute(select(Attempt).where(Attempt.student_id == student_id))
+    attempts = attempts_result.scalars().all()
+
     if not mastery_states:
-        return {"total_concepts": 0, "mastered_count": 0, "average_mastery": 0.0}
+        return {
+            "total_concepts": 0, 
+            "mastered_count": 0, 
+            "average_mastery": 0.0,
+            "mastery_pct": 0,
+            "streak_days": 1,
+            "time_saved_hours": 0.0,
+            "total_attempts": 0,
+            "weakest_concepts": []
+        }
         
     total = len(mastery_states)
     mastered = sum(1 for m in mastery_states if m.stage == "MASTERED" or m.p_mastery >= MASTERED_THRESHOLD)
     avg = sum(m.p_mastery for m in mastery_states) / total
     
+    # Calculate streak days from unique attempt dates
+    attempt_dates = set()
+    for a in attempts:
+        if a.timestamp:
+            attempt_dates.add(a.timestamp.strftime("%Y-%m-%d"))
+    streak_days = max(len(attempt_dates), 1)
+
+    time_saved = round(mastered * 0.45 + (len(attempts) * 0.1), 1)
+
     weakest = sorted(mastery_states, key=lambda m: m.p_mastery)[:3]
     weakest_ids = [m.concept_id for m in weakest]
     
@@ -515,5 +536,9 @@ async def student_summary(student_id: str, db: AsyncSession = Depends(get_db)):
         "total_concepts": total,
         "mastered_count": mastered,
         "average_mastery": avg,
+        "mastery_pct": round(avg * 100, 1),
+        "streak_days": streak_days,
+        "time_saved_hours": time_saved,
+        "total_attempts": len(attempts),
         "weakest_concepts": weakest_ids
     }
