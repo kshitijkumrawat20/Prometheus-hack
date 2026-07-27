@@ -64,7 +64,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
           </div>
           <h3 className="text-base font-bold text-white font-heading">Generating AI Presentation Slides & Visual Notes</h3>
           <p className="text-xs text-zinc-400 font-sans">
-            Gemini 3.1 & Gemini 2.5 are creating a slide-by-slide visual presentation deck for <strong className="text-[#da6b38]">{titleText}</strong>...
+            MasteryMap Adaptive Engine is synthesizing a visual presentation deck for <strong className="text-[#da6b38]">{titleText}</strong>...
           </p>
           <div className="w-full bg-zinc-900 rounded-full h-1.5 overflow-hidden">
             <div className="bg-[#da6b38] h-full w-2/3 animate-pulse"></div>
