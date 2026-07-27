@@ -155,7 +155,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
 
                 {/* 16:9 Presentation Visual Slide Image + Overlay Notes */}
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center flex-1">
-                  {/* Generated AI Presentation Graphic */}
+                  {/* Generated AI Presentation Graphic or Visual Blueprint */}
                   {currentSlide.image_url ? (
                     <div className="md:col-span-6 rounded-xl overflow-hidden border border-zinc-800 shadow-xl bg-black max-h-72">
                       <img 
@@ -165,8 +165,23 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                       />
                     </div>
                   ) : (
-                    <div className="md:col-span-6 rounded-xl border border-zinc-800 bg-zinc-900/50 p-6 flex items-center justify-center text-zinc-500 font-mono text-xs">
-                      [ Visual Slide Illustration ]
+                    <div className="md:col-span-6 rounded-xl border border-zinc-800 bg-[#13151a] p-6 flex flex-col justify-between min-h-[220px] space-y-4 shadow-inner">
+                      <div className="flex justify-between items-center border-b border-zinc-800/80 pb-2">
+                        <span className="text-[10px] font-mono text-[#da6b38] font-bold uppercase tracking-wider">
+                          AI Visual Slide Card
+                        </span>
+                        <span className="text-[10px] font-mono text-zinc-500">16:9 Blueprint</span>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-bold text-white font-heading">{currentSlide.title}</h4>
+                        <p className="text-xs text-zinc-400 font-sans line-clamp-3">
+                          {currentSlide.key_term || currentSlide.formula || currentSlide.summary_tip || (currentSlide.content_bullets && currentSlide.content_bullets[0])}
+                        </p>
+                      </div>
+                      <div className="pt-2 border-t border-zinc-800/80 flex justify-between items-center text-[10px] font-mono text-zinc-500">
+                        <span>MasteryMap Deck</span>
+                        <span>Slide {currentSlideIndex + 1}</span>
+                      </div>
                     </div>
                   )}
 
@@ -235,8 +250,8 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                         <img src={slide.image_url} alt="" className="w-full h-full object-cover" />
                       </div>
                     ) : (
-                      <div className="w-full h-16 rounded-md bg-zinc-950 mb-1.5 flex items-center justify-center text-[9px] text-zinc-600 font-mono">
-                        Slide {idx + 1}
+                      <div className="w-full h-16 rounded-md bg-zinc-950 mb-1.5 flex items-center justify-center text-[9px] text-zinc-500 font-mono p-1 text-center border border-zinc-800">
+                        {slide.title}
                       </div>
                     )}
                     <div className="text-[11px] font-bold text-white truncate font-heading">{slide.title}</div>

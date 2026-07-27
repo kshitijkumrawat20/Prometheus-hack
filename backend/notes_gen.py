@@ -15,7 +15,7 @@ def generate_slide_image(slide_title: str, bullets: list, key_info: str) -> str 
         'temperature': 1,
         'max_output_tokens': 65536,
         'top_p': 0.95,
-        'thinking_level': 'minimal',
+        'thinking_level': 'low',
         'image_config': {
             'image_size': '1K',
         },
@@ -24,7 +24,7 @@ def generate_slide_image(slide_title: str, bullets: list, key_info: str) -> str 
     bullets_text = " • ".join(bullets[:3]) if bullets else ""
     prompt = f"Educational 16:9 presentation slide card graphic. Dark background style. Title: '{slide_title}'. Notes: {bullets_text}. Details: {key_info}. High resolution infographic vector style."
 
-    # Primary: User-specified client.interactions API with gemini-3.1-flash-lite-image
+    # Primary: client.interactions API with gemini-3.1-flash-lite-image
     try:
         if hasattr(client, 'interactions'):
             interaction = client.interactions.create(
@@ -44,12 +44,12 @@ def generate_slide_image(slide_title: str, bullets: list, key_info: str) -> str 
                                 b64_str = str(b64_data)
                             return f"data:image/jpeg;base64,{b64_str}"
     except Exception as e:
-        logger.warning(f"Interactions API gemini-3.1-flash-lite-image unavailable, falling back: {e}")
+        logger.warning(f"Interactions API gemini-3.1-flash-lite-image fallback attempt: {e}")
 
-    # Fallback 1: client.models.generate_images
+    # Fallback 1: client.models.generate_images with imagen-3.0-generate-001
     try:
         response = client.models.generate_images(
-            model='imagen-3.0-generate-002',
+            model='imagen-3.0-generate-001',
             prompt=prompt,
             config=types.GenerateImagesConfig(
                 number_of_images=1,
@@ -61,7 +61,7 @@ def generate_slide_image(slide_title: str, bullets: list, key_info: str) -> str 
             b64_str = base64.b64encode(img_bytes).decode('utf-8')
             return f"data:image/jpeg;base64,{b64_str}"
     except Exception as e:
-        logger.warning(f"Imagen 3 image generation fallback unavailable: {e}")
+        logger.warning(f"Imagen image generation fallback unavailable: {e}")
 
     return None
 
