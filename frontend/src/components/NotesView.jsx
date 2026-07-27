@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getConceptNotes, getLevelNotes } from '../api';
+import ImageLightboxModal from './ImageLightboxModal';
 
 const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
   const [notes, setNotes] = useState(null);
@@ -7,6 +8,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [error, setError] = useState(null);
   const [viewMode, setViewMode] = useState('presentation'); // 'presentation' or 'grid'
+  const [zoomedImage, setZoomedImage] = useState(null); // { url, title }
 
   useEffect(() => {
     let isMounted = true;
@@ -38,6 +40,17 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
 
   const handleDownloadPDF = () => {
     window.print();
+  };
+
+  const handleDownloadIndividualImage = (e, url, title) => {
+    e.stopPropagation();
+    const link = document.createElement('a');
+    link.href = url;
+    const safeTitle = (title || 'slide_image').toLowerCase().replace(/[^a-z0-9]/g, '_');
+    link.download = `${safeTitle}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const titleText = levelData ? levelData.levelName : conceptName;
@@ -159,12 +172,28 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center flex-1">
                     {/* Generated AI Presentation Graphic or Visual Blueprint */}
                     {currentSlide.image_url ? (
-                      <div className="md:col-span-6 rounded-xl overflow-hidden border border-zinc-800 shadow-xl bg-black max-h-72">
+                      <div 
+                        onClick={() => setZoomedImage({ url: currentSlide.image_url, title: currentSlide.title })}
+                        className="md:col-span-6 rounded-xl overflow-hidden border border-zinc-800 shadow-xl bg-black max-h-72 group relative cursor-pointer"
+                      >
                         <img 
                           src={currentSlide.image_url} 
                           alt={`Presentation Slide Graphic for ${currentSlide.title}`} 
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
+                        {/* Hover Overlay Badge */}
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3 backdrop-blur-xs">
+                          <span className="px-3 py-1.5 rounded-xl bg-[#da6b38] text-white text-xs font-bold font-heading flex items-center gap-1.5 shadow-lg">
+                            🔍 Zoom & Inspect
+                          </span>
+                          <button
+                            onClick={(e) => handleDownloadIndividualImage(e, currentSlide.image_url, currentSlide.title)}
+                            className="p-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold font-heading border border-zinc-700 shadow-lg"
+                            title="Download this image file"
+                          >
+                            📥 Save Image
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       <div className="md:col-span-6 rounded-xl border border-zinc-800 bg-[#13151a] p-6 flex flex-col justify-between min-h-[220px] space-y-4 shadow-inner">
@@ -248,7 +277,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                         <span className="text-zinc-500">16:9</span>
                       </div>
                       {slide.image_url ? (
-                        <div className="w-full h-16 rounded-md overflow-hidden bg-black mb-1.5 border border-zinc-800">
+                        <div className="w-full h-16 rounded-md overflow-hidden bg-black mb-1.5 border border-zinc-800 relative group">
                           <img src={slide.image_url} alt="" className="w-full h-full object-cover" />
                         </div>
                       ) : (
@@ -274,8 +303,20 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                     </div>
 
                     {slide.image_url && (
-                      <div className="w-full h-40 rounded-lg overflow-hidden border border-zinc-800 bg-black">
-                        <img src={slide.image_url} alt="" className="w-full h-full object-cover" />
+                      <div 
+                        onClick={() => setZoomedImage({ url: slide.image_url, title: slide.title })}
+                        className="w-full h-40 rounded-lg overflow-hidden border border-zinc-800 bg-black cursor-pointer relative group"
+                      >
+                        <img src={slide.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                          <span className="px-2.5 py-1 rounded-lg bg-[#da6b38] text-white text-[11px] font-bold">🔍 Zoom</span>
+                          <button
+                            onClick={(e) => handleDownloadIndividualImage(e, slide.image_url, slide.title)}
+                            className="p-1 px-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-[11px] font-bold"
+                          >
+                            📥 Save
+                          </button>
+                        </div>
                       </div>
                     )}
 
@@ -320,7 +361,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
         </div>
       </div>
 
-      {/* Hidden-on-Screen Dedicated PDF Presentation Deck (Outputs Exactly 1 Slide Per PDF Page in Landscape) */}
+      {/* Hidden-on-Screen Dedicated PDF Presentation Deck */}
       <div className="hidden print:block pdf-presentation-deck w-full">
         {slides.map((slide, idx) => (
           <div key={idx} className="pdf-slide-page">
@@ -387,6 +428,14 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
           </div>
         ))}
       </div>
+
+      {/* Image Lightbox Zoom Modal */}
+      <ImageLightboxModal
+        isOpen={Boolean(zoomedImage)}
+        onClose={() => setZoomedImage(null)}
+        imageUrl={zoomedImage?.url}
+        imageTitle={zoomedImage?.title}
+      />
     </>
   );
 };
