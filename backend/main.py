@@ -14,8 +14,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import delete
 
+import json
 from db import engine, Base, get_db
-from models import User, Concept, ConceptEdge, MasteryState, Question, Attempt
+from models import User, Concept, ConceptEdge, MasteryState, Question, Attempt, GeneratedNote
 from bkt import update_mastery, get_mastery_level, BKTParams
 from selector import select_next_concept, next_action, MASTERED_THRESHOLD
 from question_gen import generate_question, evaluate_answer
@@ -329,12 +330,24 @@ async def advance_lesson_stage(req: StageAdvanceReq, db: AsyncSession = Depends(
 class LevelNotesReq(BaseModel):
     level_name: str
     concept_ids: List[str]
+    force: Optional[bool] = False
 
 @app.get("/api/notes/{concept_id}")
-async def get_concept_notes(concept_id: str, db: AsyncSession = Depends(get_db)):
-    """Generates slide-by-slide study notes with Imagen AI illustrations for a concept."""
-    concept_result = await db.execute(select(Concept).where(Concept.id == concept_id))
-    concept = concept_result.scalars().first()
+async def get_notes(concept_id: str, force: Optional[bool] = False, db: AsyncSession = Depends(get_db)):
+    """Get structured presentation slide notes for a concept, cached in SQLite DB."""
+    note_key = f"concept:{concept_id}"
+
+    if not force:
+        cached_result = await db.execute(select(GeneratedNote).where(GeneratedNote.note_key == note_key))
+        cached = cached_result.scalars().first()
+        if cached:
+            try:
+                return json.loads(cached.notes_json)
+            except Exception as e:
+                logger.warning(f"Failed to parse cached note json for {note_key}: {e}")
+
+    c_result = await db.execute(select(Concept).where(Concept.id == concept_id))
+    concept = c_result.scalars().first()
     if not concept:
         raise HTTPException(status_code=404, detail="Concept not found")
         
@@ -349,6 +362,19 @@ async def get_concept_notes(concept_id: str, db: AsyncSession = Depends(get_db))
     concept_dict = {"id": concept.id, "label": concept.label, "description": concept.description}
     try:
         notes = generate_lesson_notes(concept_dict, prereq_labels)
+        notes_json_str = json.dumps(notes)
+        
+        # Persist to SQLite DB
+        cached_result = await db.execute(select(GeneratedNote).where(GeneratedNote.note_key == note_key))
+        existing = cached_result.scalars().first()
+        if existing:
+            existing.notes_json = notes_json_str
+            db.add(existing)
+        else:
+            new_note = GeneratedNote(note_key=note_key, notes_json=notes_json_str)
+            db.add(new_note)
+        await db.commit()
+
         return notes
     except Exception as e:
         logger.error(f"Error generating notes: {e}")
@@ -356,10 +382,21 @@ async def get_concept_notes(concept_id: str, db: AsyncSession = Depends(get_db))
 
 @app.post("/api/notes/level")
 async def get_level_notes(req: LevelNotesReq, db: AsyncSession = Depends(get_db)):
-    """Generates level-by-level study slide deck covering all concepts in a tier."""
+    """Generates level-by-level study slide deck, cached in SQLite DB."""
     if not req.concept_ids:
         raise HTTPException(status_code=400, detail="No concept IDs provided for level")
-        
+
+    note_key = f"level:{req.level_name}"
+
+    if not req.force:
+        cached_result = await db.execute(select(GeneratedNote).where(GeneratedNote.note_key == note_key))
+        cached = cached_result.scalars().first()
+        if cached:
+            try:
+                return json.loads(cached.notes_json)
+            except Exception as e:
+                logger.warning(f"Failed to parse cached level note json for {note_key}: {e}")
+
     concepts_result = await db.execute(select(Concept).where(Concept.id.in_(req.concept_ids)))
     concepts = concepts_result.scalars().all()
     if not concepts:
@@ -368,6 +405,19 @@ async def get_level_notes(req: LevelNotesReq, db: AsyncSession = Depends(get_db)
     concept_dicts = [{"id": c.id, "label": c.label, "description": c.description} for c in concepts]
     try:
         notes = generate_level_notes(req.level_name, concept_dicts)
+        notes_json_str = json.dumps(notes)
+
+        # Persist to SQLite DB
+        cached_result = await db.execute(select(GeneratedNote).where(GeneratedNote.note_key == note_key))
+        existing = cached_result.scalars().first()
+        if existing:
+            existing.notes_json = notes_json_str
+            db.add(existing)
+        else:
+            new_note = GeneratedNote(note_key=note_key, notes_json=notes_json_str)
+            db.add(new_note)
+        await db.commit()
+
         return notes
     except Exception as e:
         logger.error(f"Error generating level notes: {e}")

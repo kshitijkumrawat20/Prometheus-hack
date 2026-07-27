@@ -57,3 +57,10 @@ class Attempt(Base):
     correct = Column(Boolean)
     error_type = Column(String, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
+
+class GeneratedNote(Base):
+    __tablename__ = 'generated_notes'
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    note_key = Column(String, unique=True, nullable=False, index=True)
+    notes_json = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
