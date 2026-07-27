@@ -117,3 +117,50 @@ h1, h2, h3, h4, .font-heading {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(218, 107, 56, 0.5);
 }
+
+/* Print PDF Presentation Export Formatting (1 Slide Per Page in Landscape) */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+
+  html, body {
+    background: #0c0d10 !important;
+    color: #ffffff !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  header, nav, button, .print-hidden, ::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .pdf-presentation-deck {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .pdf-slide-page {
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #0c0d10 !important;
+    padding: 1.5rem !important;
+    box-sizing: border-box !important;
+  }
+
+  .pdf-slide-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+}
