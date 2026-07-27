@@ -7,7 +7,8 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
   const [loading, setLoading] = useState(true);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [error, setError] = useState(null);
-  const [viewMode, setViewMode] = useState('presentation'); // 'presentation' or 'grid'
+  const [viewMode, setViewMode] = useState('presentation'); // 'presentation', 'flashcards', 'grid'
+  const [flippedCards, setFlippedCards] = useState({}); // { [slideIndex]: boolean }
   const [zoomedImage, setZoomedImage] = useState(null); // { url, title }
 
   useEffect(() => {
@@ -40,6 +41,10 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
 
   const handleDownloadPDF = () => {
     window.print();
+  };
+
+  const toggleCardFlip = (idx) => {
+    setFlippedCards(prev => ({ ...prev, [idx]: !prev[idx] }));
   };
 
   const handleDownloadIndividualImage = (e, url, title) => {
@@ -125,12 +130,20 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                   🖥️ Slideshow
                 </button>
                 <button
+                  onClick={() => setViewMode('flashcards')}
+                  className={`px-3 py-1 rounded-lg font-bold transition-all ${
+                    viewMode === 'flashcards' ? 'bg-[#da6b38] text-white' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  🎴 3D Flashcards
+                </button>
+                <button
                   onClick={() => setViewMode('grid')}
                   className={`px-3 py-1 rounded-lg font-bold transition-all ${
                     viewMode === 'grid' ? 'bg-[#da6b38] text-white' : 'text-zinc-400 hover:text-white'
                   }`}
                 >
-                  📊 Storyboard Grid
+                  📊 Storyboard
                 </button>
               </div>
 
@@ -289,6 +302,88 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                     </div>
                   ))}
                 </div>
+              </div>
+            ) : viewMode === 'flashcards' ? (
+              /* 🎴 Interactive 3D Flip Flashcards Mode */
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {slides.map((slide, idx) => {
+                  const isFlipped = Boolean(flippedCards[idx]);
+                  return (
+                    <div 
+                      key={idx} 
+                      className="perspective-1000 h-80 w-full cursor-pointer group"
+                      onClick={() => toggleCardFlip(idx)}
+                    >
+                      <div className={`relative h-full w-full rounded-2xl transition-transform duration-500 transform-style-preserve-3d shadow-xl border border-zinc-800 ${
+                        isFlipped ? 'rotate-y-180' : ''
+                      }`}>
+                        {/* Front of Flashcard */}
+                        <div className="absolute inset-0 h-full w-full rounded-2xl bg-[#0c0d10] p-6 flex flex-col justify-between backface-hidden border border-zinc-800/80">
+                          <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+                            <span className="px-2.5 py-0.5 rounded-full bg-[#da6b38]/15 text-[#da6b38] border border-[#da6b38]/30 text-[10px] font-mono font-bold">
+                              Flashcard #{idx + 1}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500">Tap to Reveal Answer 🔄</span>
+                          </div>
+                          
+                          <div className="space-y-3 my-auto text-center">
+                            <h4 className="text-base font-extrabold text-white font-heading">{slide.title}</h4>
+                            <p className="text-xs text-zinc-400 font-sans italic max-w-xs mx-auto">
+                              "Can you recall the core definition, formula, or solution key for this slide topic?"
+                            </p>
+                          </div>
+
+                          <div className="pt-3 border-t border-zinc-800/80 flex justify-center">
+                            <button className="btn-secondary px-4 py-1.5 rounded-xl text-xs font-bold font-heading text-[#da6b38] flex items-center gap-1.5">
+                              🔄 Click / Tap Card to Flip
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Back of Flashcard (Revealed on 3D Flip) */}
+                        <div className="absolute inset-0 h-full w-full rounded-2xl bg-[#13151a] p-6 flex flex-col justify-between rotate-y-180 backface-hidden border border-[#da6b38]/40 shadow-2xl">
+                          <div className="flex justify-between items-center border-b border-zinc-800 pb-3">
+                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
+                              Answer & Core Knowledge
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-500">Card #{idx + 1}</span>
+                          </div>
+
+                          <div className="space-y-3 overflow-y-auto custom-scrollbar my-auto pr-1">
+                            {slide.key_term && (
+                              <div className="text-xs font-mono text-zinc-200 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                                <div className="text-[10px] font-bold text-[#da6b38] uppercase">Key Definition</div>
+                                <div>{slide.key_term}</div>
+                              </div>
+                            )}
+
+                            {slide.formula && (
+                              <div className="text-xs font-mono text-cyan-300 bg-zinc-900 p-3 rounded-xl border border-zinc-800">
+                                <div className="text-[10px] font-bold text-zinc-400 uppercase">Equation</div>
+                                <div>{slide.formula}</div>
+                              </div>
+                            )}
+
+                            {slide.content_bullets && (
+                              <ul className="space-y-1.5 text-xs text-zinc-300">
+                                {slide.content_bullets.map((b, bIdx) => (
+                                  <li key={bIdx} className="flex items-start gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#da6b38] mt-1 shrink-0"></span>
+                                    <span>{b}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+
+                          <div className="pt-3 border-t border-zinc-800 flex justify-center">
+                            <span className="text-[11px] font-mono text-zinc-400">🔄 Tap to Flip Back</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               /* Storyboard Grid View */
