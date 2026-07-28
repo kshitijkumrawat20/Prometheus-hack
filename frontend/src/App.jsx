@@ -191,17 +191,17 @@ function App() {
   return (
     <div className="min-h-screen w-full bg-[#0c0d10] text-zinc-100 flex flex-col p-3 md:p-5 gap-4 relative font-sans overflow-y-auto custom-scrollbar">
       {/* Top Application Navigation Bar */}
-      <header className="flex justify-between items-center z-20 gap-3 glass-panel p-3 px-4 md:px-5 rounded-2xl border border-zinc-800 shadow-xl flex-wrap md:flex-nowrap shrink-0">
+      <header className="w-full max-w-full flex justify-between items-center z-20 gap-2 md:gap-3 glass-panel p-2.5 px-3 md:px-5 rounded-2xl border border-zinc-800 shadow-xl overflow-x-auto custom-scrollbar shrink-0">
         {/* Brand Logo */}
-        <div className="flex items-center gap-3 cursor-pointer shrink-0" onClick={() => setActiveTab('launch')}>
-          <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-[#da6b38] flex items-center justify-center text-white font-bold text-lg shadow-md shadow-[#da6b38]/20">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+        <div className="flex items-center gap-2 md:gap-3 cursor-pointer shrink-0" onClick={() => setActiveTab('launch')}>
+          <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[#da6b38] flex items-center justify-center text-white font-bold text-base md:text-lg shadow-md shadow-[#da6b38]/20 shrink-0">
+            <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
           </div>
-          <div>
-            <h1 className="text-lg md:text-xl font-extrabold text-white tracking-tight font-heading leading-none">
+          <div className="hidden sm:block">
+            <h1 className="text-base md:text-xl font-extrabold text-white tracking-tight font-heading leading-none">
               MasteryMap
             </h1>
-            <span className="text-[10px] text-zinc-400 font-mono tracking-wider uppercase">Adaptive Learning System</span>
+            <span className="text-[9px] md:text-[10px] text-zinc-400 font-mono tracking-wider uppercase">Adaptive Learning</span>
           </div>
         </div>
 
@@ -209,14 +209,14 @@ function App() {
         <nav className="flex items-center gap-1 glass-panel p-1 rounded-xl border border-zinc-800 font-heading text-xs shrink-0">
           <button
             onClick={() => setActiveTab('launch')}
-            className="px-3 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all text-zinc-400 hover:text-white flex items-center gap-1.5"
+            className="px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all text-zinc-400 hover:text-white flex items-center gap-1 text-[11px] md:text-xs"
           >
             <span>Home</span>
           </button>
 
           <button
             onClick={() => handleProtectedAction('upload')}
-            className={`px-3 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1 text-[11px] md:text-xs ${
               activeTab === 'upload' 
                 ? 'bg-[#da6b38] text-white shadow-sm' 
                 : 'text-zinc-400 hover:text-white'
@@ -227,7 +227,7 @@ function App() {
 
           <button
             onClick={() => handleProtectedAction('roadmap')}
-            className={`px-3 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1 text-[11px] md:text-xs ${
               activeTab === 'roadmap' 
                 ? 'bg-[#da6b38] text-white shadow-sm' 
                 : 'text-zinc-400 hover:text-white'
@@ -239,13 +239,13 @@ function App() {
 
           <button
             onClick={() => handleProtectedAction('tutor')}
-            className={`px-3 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1.5 relative ${
+            className={`px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1 text-[11px] md:text-xs relative ${
               activeTab === 'tutor' 
                 ? 'bg-[#da6b38] text-white shadow-sm' 
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            <span>AI Tutor Session</span>
+            <span>AI Tutor</span>
             {!user && <span className="text-[10px]">🔒</span>}
             {currentAction && !isComplete && user && (
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping absolute top-1 right-1"></span>
@@ -254,7 +254,7 @@ function App() {
 
           <button
             onClick={() => handleProtectedAction('analytics')}
-            className={`px-3 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-2.5 py-1.5 md:px-3.5 md:py-2 rounded-lg font-bold transition-all flex items-center gap-1 text-[11px] md:text-xs ${
               activeTab === 'analytics' 
                 ? 'bg-[#da6b38] text-white shadow-sm' 
                 : 'text-zinc-400 hover:text-white'
@@ -266,18 +266,18 @@ function App() {
         </nav>
 
         {/* Gamified Study Streak Header & User Profile Button */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {user && <StreakHeaderBadge studentId={studentId} graphData={graphData} />}
 
           {user ? (
-            <div className="glass-panel px-3 py-1.5 rounded-xl border border-zinc-800 flex items-center gap-2 shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
-              <span className="text-xs font-bold text-white font-mono max-w-[130px] md:max-w-[170px] truncate" title={user.username}>
+            <div className="glass-panel px-2.5 md:px-3 py-1.5 rounded-xl border border-zinc-800 flex items-center gap-1.5 shadow-sm max-w-[130px] sm:max-w-[170px] md:max-w-[210px] shrink-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+              <span className="text-[11px] md:text-xs font-bold text-white font-mono truncate" title={user.username}>
                 {user.username}
               </span>
               <button 
                 onClick={handleLogout}
-                className="text-[11px] text-zinc-400 hover:text-rose-400 font-medium ml-1 transition-colors shrink-0"
+                className="text-[10px] md:text-[11px] text-zinc-400 hover:text-rose-400 font-medium ml-0.5 transition-colors shrink-0"
                 title="Sign Out"
               >
                 Sign Out
@@ -286,9 +286,9 @@ function App() {
           ) : (
             <button
               onClick={() => setIsAuthOpen(true)}
-              className="btn-primary px-3.5 py-1.5 md:py-2 rounded-xl text-xs font-bold font-heading shadow-md flex items-center gap-1.5"
+              className="btn-primary px-3 py-1.5 md:py-2 rounded-xl text-xs font-bold font-heading shadow-md flex items-center gap-1 shrink-0"
             >
-              <span>Sign In / Register</span>
+              <span>Sign In</span>
             </button>
           )}
         </div>

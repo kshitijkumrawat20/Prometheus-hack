@@ -34,41 +34,41 @@ const StreakHeaderBadge = ({ studentId, graphData }) => {
   if (!studentId) return null;
 
   return (
-    <div className="flex items-center gap-2 font-mono text-xs shrink-0 print-hidden">
+    <div className="flex items-center gap-1.5 md:gap-2 font-mono text-xs shrink-0 print-hidden">
       {/* Daily Study Streak Flame */}
       <div 
-        className="glass-panel px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 flex items-center gap-1.5 shadow-sm hover:border-amber-500/50 transition-all cursor-default group"
-        title="Daily Learning Streak: Number of consecutive days you've learned or practiced!"
+        className="glass-panel px-2.5 md:px-3 py-1.5 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-300 flex items-center gap-1 shadow-sm hover:border-amber-500/50 transition-all cursor-default group"
+        title="Daily Learning Streak"
       >
-        <span className="text-sm animate-pulse group-hover:scale-125 transition-transform">🔥</span>
-        <span className="font-bold text-amber-200">{stats.streak_days || 1}d Streak</span>
+        <span className="text-xs md:text-sm animate-pulse group-hover:scale-125 transition-transform">🔥</span>
+        <span className="font-bold text-amber-200 text-[11px] md:text-xs">{stats.streak_days || 1}d Streak</span>
       </div>
 
       {/* Mastery Score Badge */}
       <div 
-        className="glass-panel px-3 py-1.5 rounded-xl border border-[#da6b38]/30 bg-[#da6b38]/10 text-[#da6b38] flex items-center gap-1.5 shadow-sm hover:border-[#da6b38]/50 transition-all cursor-default"
-        title="Overall Concept Mastery Level across syllabus"
+        className="glass-panel px-2.5 md:px-3 py-1.5 rounded-xl border border-[#da6b38]/30 bg-[#da6b38]/10 text-[#da6b38] flex items-center gap-1 shadow-sm hover:border-[#da6b38]/50 transition-all cursor-default"
+        title="Overall Concept Mastery Level"
       >
-        <span className="text-sm">🏆</span>
-        <span className="font-bold text-white">{stats.mastery_pct || 0}% Mastery</span>
+        <span className="text-xs md:text-sm">🏆</span>
+        <span className="font-bold text-white text-[11px] md:text-xs">{stats.mastery_pct || 0}%</span>
       </div>
 
-      {/* Concepts Mastered Badge */}
+      {/* Concepts Mastered Badge (Visible on wider desktops) */}
       <div 
-        className="hidden lg:flex glass-panel px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 items-center gap-1.5 shadow-sm hover:border-emerald-500/50 transition-all cursor-default"
-        title="Concepts Mastered vs Total in Syllabus"
+        className="hidden 2xl:flex glass-panel px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 items-center gap-1.5 shadow-sm"
+        title="Concepts Mastered vs Total"
       >
         <span className="text-sm">⚡</span>
-        <span className="font-bold text-emerald-200">{stats.mastered_count || 0}/{stats.total_concepts || 0}</span>
+        <span className="font-bold text-emerald-200 text-xs">{stats.mastered_count || 0}/{stats.total_concepts || 0}</span>
       </div>
 
-      {/* Estimated Time Saved */}
+      {/* Time Saved Badge (Visible on extra wide monitors) */}
       <div 
-        className="hidden xl:flex glass-panel px-3 py-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 items-center gap-1.5 shadow-sm hover:border-cyan-500/50 transition-all cursor-default"
-        title="Estimated Study Hours Saved through Adaptive Learning by skipping mastered topics"
+        className="hidden 2xl:flex glass-panel px-3 py-1.5 rounded-xl border border-cyan-500/30 bg-cyan-500/10 text-cyan-300 items-center gap-1.5 shadow-sm"
+        title="Estimated Study Hours Saved"
       >
         <span className="text-sm">⏱️</span>
-        <span className="font-bold text-cyan-200">{stats.time_saved_hours || 0}h Saved</span>
+        <span className="font-bold text-cyan-200 text-xs">{(stats.time_saved_hours || 0).toFixed(1)}h Saved</span>
       </div>
     </div>
   );
