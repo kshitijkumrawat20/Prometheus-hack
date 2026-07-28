@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getConceptNotes, getLevelNotes } from '../api';
 import ImageLightboxModal from './ImageLightboxModal';
 
@@ -61,8 +62,8 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
   const titleText = levelData ? levelData.levelName : conceptName;
 
   if (loading) {
-    return (
-      <div className="fixed inset-0 z-[99999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-4">
+    const loadingJSX = (
+      <div className="fixed inset-0 z-[999999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-4">
         <div className="bg-[#13151a] p-8 rounded-2xl border border-zinc-800 max-w-md text-center space-y-4 shadow-2xl">
           <div className="w-10 h-10 rounded-xl bg-[#da6b38] flex items-center justify-center mx-auto text-white text-xl animate-bounce">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12H4z" /></svg>
@@ -77,11 +78,12 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
         </div>
       </div>
     );
+    return createPortal(loadingJSX, document.body);
   }
 
   if (error || !notes || !notes.slides) {
-    return (
-      <div className="fixed inset-0 z-[99999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-4">
+    const errorJSX = (
+      <div className="fixed inset-0 z-[999999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-4">
         <div className="bg-[#13151a] p-8 rounded-2xl border border-zinc-800 max-w-md text-center space-y-4">
           <div className="text-3xl">⚠️</div>
           <h3 className="text-base font-bold text-white font-heading">Presentation Generation Unavailable</h3>
@@ -92,18 +94,19 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
         </div>
       </div>
     );
+    return createPortal(errorJSX, document.body);
   }
 
   const slides = notes.slides;
   const currentSlide = slides[currentSlideIndex];
 
-  return (
+  const mainJSX = (
     <>
       {/* On-Screen Modal Presentation Viewer */}
-      <div className="fixed inset-0 z-[99999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-3 md:p-6 overflow-y-auto print-hidden">
-        <div className="w-full max-w-5xl bg-[#13151a] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
+      <div className="fixed inset-0 z-[999999] bg-[#0c0d10]/98 backdrop-blur-2xl flex flex-col items-center justify-center p-3 md:p-6 overflow-y-auto print-hidden">
+        <div className="w-full max-w-5xl bg-[#13151a] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[94vh] my-auto mt-2">
           {/* Header Navigation Bar */}
-          <div className="p-4 px-6 border-b border-zinc-800 flex justify-between items-center bg-[#0c0d10]/60">
+          <div className="p-4 px-6 border-b border-zinc-800 flex justify-between items-center bg-[#0c0d10]/80 shrink-0">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-xl bg-[#da6b38] flex items-center justify-center text-white font-bold text-base shadow-sm">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12H4z" /></svg>
@@ -112,7 +115,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
                 <div className="text-[10px] font-mono uppercase tracking-wider text-[#da6b38] font-bold">
                   {levelData ? 'Level AI Presentation Deck' : 'Concept AI Presentation Deck'}
                 </div>
-                <h2 className="text-base font-extrabold text-white font-heading leading-tight">
+                <h2 className="text-base font-extrabold text-white font-heading leading-tight truncate max-w-xs md:max-w-md">
                   {notes.concept_name}
                 </h2>
               </div>
@@ -159,6 +162,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
               <button
                 onClick={onClose}
                 className="p-1.5 text-zinc-400 hover:text-white rounded-xl hover:bg-zinc-800 transition-colors text-base"
+                title="Close Window"
               >
                 ✕
               </button>
@@ -432,7 +436,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
           </div>
 
           {/* Footer Controls */}
-          <div className="p-4 px-6 border-t border-zinc-800 flex justify-between items-center bg-[#0c0d10]/60">
+          <div className="p-4 px-6 border-t border-zinc-800 flex justify-between items-center bg-[#0c0d10]/80 shrink-0">
             <button
               disabled={currentSlideIndex === 0}
               onClick={() => setCurrentSlideIndex(prev => prev - 1)}
@@ -533,6 +537,8 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
       />
     </>
   );
+
+  return createPortal(mainJSX, document.body);
 };
 
 export default NotesView;

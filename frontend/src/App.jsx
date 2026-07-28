@@ -110,10 +110,10 @@ function App() {
   }, [studentId]);
 
   useEffect(() => {
-    if (studentId && activeTab !== 'launch' && activeTab !== 'upload') {
+    if (studentId) {
       refreshData();
     }
-  }, [studentId, activeTab, refreshData]);
+  }, [studentId, refreshData]);
 
   // Auth Guard Handler
   const handleProtectedAction = (targetTab) => {
@@ -310,7 +310,12 @@ function App() {
           : 'h-[calc(100vh-100px)] min-h-[580px]'
       }`}>
         {activeTab === 'upload' && (
-          <SyllabusUpload onUpload={handleUpload} isLoading={isLoading} />
+          <SyllabusUpload 
+            onUpload={handleUpload} 
+            isLoading={isLoading} 
+            graphData={graphData}
+            onNavigateToRoadmap={() => setActiveTab('roadmap')}
+          />
         )}
 
         {activeTab === 'roadmap' && user && (
