@@ -62,7 +62,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
 
   if (loading) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#0c0d10]/95 backdrop-blur-2xl flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[99999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-4">
         <div className="bg-[#13151a] p-8 rounded-2xl border border-zinc-800 max-w-md text-center space-y-4 shadow-2xl">
           <div className="w-10 h-10 rounded-xl bg-[#da6b38] flex items-center justify-center mx-auto text-white text-xl animate-bounce">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12H4z" /></svg>
@@ -81,7 +81,7 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
 
   if (error || !notes || !notes.slides) {
     return (
-      <div className="fixed inset-0 z-50 bg-[#0c0d10]/95 backdrop-blur-2xl flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[99999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-4">
         <div className="bg-[#13151a] p-8 rounded-2xl border border-zinc-800 max-w-md text-center space-y-4">
           <div className="text-3xl">⚠️</div>
           <h3 className="text-base font-bold text-white font-heading">Presentation Generation Unavailable</h3>
@@ -100,8 +100,8 @@ const NotesView = ({ conceptId, conceptName, levelData, onClose }) => {
   return (
     <>
       {/* On-Screen Modal Presentation Viewer */}
-      <div className="fixed inset-0 z-50 bg-[#0c0d10]/95 backdrop-blur-2xl flex items-center justify-center p-3 md:p-6 overflow-y-auto print-hidden">
-        <div className="w-full max-w-5xl bg-[#13151a] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="fixed inset-0 z-[99999] bg-[#0c0d10]/98 backdrop-blur-2xl flex items-center justify-center p-3 md:p-6 overflow-y-auto print-hidden">
+        <div className="w-full max-w-5xl bg-[#13151a] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] my-auto">
           {/* Header Navigation Bar */}
           <div className="p-4 px-6 border-b border-zinc-800 flex justify-between items-center bg-[#0c0d10]/60">
             <div className="flex items-center gap-3">

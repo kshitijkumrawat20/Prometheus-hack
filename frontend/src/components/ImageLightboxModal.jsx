@@ -20,7 +20,7 @@ const ImageLightboxModal = ({ isOpen, onClose, imageUrl, imageTitle }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0c0d10]/95 backdrop-blur-2xl flex flex-col items-center justify-between p-4 md:p-6 animate-fade-in print-hidden">
+    <div className="fixed inset-0 z-[100000] bg-[#0c0d10]/95 backdrop-blur-2xl flex flex-col items-center justify-between p-4 md:p-6 animate-fade-in print-hidden">
       {/* Top Header Bar */}
       <div className="w-full max-w-6xl flex justify-between items-center bg-[#13151a] p-4 px-6 rounded-2xl border border-zinc-800 shadow-2xl z-10">
         <div className="flex items-center gap-3">
