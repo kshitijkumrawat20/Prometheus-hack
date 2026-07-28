@@ -53,7 +53,7 @@ const LaunchPage = ({ onLaunchApp, onTryDemo, user }) => {
         {/* Sleek Pill Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-300 font-mono">
           <span className="w-2 h-2 rounded-full bg-[#da6b38]"></span>
-          Adaptive Bayesian Knowledge Engine
+          MasteryMap AI Learning Engine
         </div>
 
         {/* Hero Title */}
